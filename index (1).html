@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>PVA nach Barrett</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+        
+        .selection-counter {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .values-panel {
+            padding: 15px;
+            border-right: 2px solid #e0e0e0;
+            height: calc(100vh - 140px);
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .values-panel h2 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.3em;
+        }
+        
+        .search-box {
+            margin-bottom: 8px;
+            padding: 8px;
+            width: 100%;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.85em;
+            transition: border-color 0.3s;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .value-card {
+            padding: 8px 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            text-align: center;
+            font-size: 0.78em;
+            height: fit-content;
+            line-height: 1.3;
+        }
+        
+        .value-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .value-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+            font-weight: bold;
+        }
+        
+        .value-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .value-card.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .value-card.hidden {
+            display: none;
+        }
+        
+        .visualization-panel {
+            padding: 15px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - 140px);
+        }
+        
+        .visualization-panel h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .visualization-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1em;
+        }
+        
+        .double-pyramid-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .pyramid-section {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .pyramid-title {
+            text-align: center;
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: #e8e8e8;
+            border-radius: 8px;
+        }
+
+        .pyramid-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .pyramid-row {
+            display: flex;
+            align-items: center;
+            min-height: 55px;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-pyramid .pyramid-row {
+            justify-content: space-between;
+            padding: 8px 12px;
+        }
+
+        .pyramid-row-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 12px;
+        }
+
+        .pyramid-level-number {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: white;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .pyramid-level-info {
+            flex: 1;
+            color: white;
+        }
+
+        .pyramid-level-name {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 2px;
+        }
+
+        .pyramid-level-desc {
+            font-size: 0.75em;
+            opacity: 0.9;
+        }
+
+        .pyramid-dots-container {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            max-width: 110px;
+        }
+
+        .pyramid-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.6);
+            background: transparent;
+        }
+
+        .pyramid-dot.filled {
+            background: white;
+            box-shadow: 0 0 8px rgba(255,255,255,0.8);
+        }
+
+        .level-1-bg { background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%); }
+        .level-2-bg { background: linear-gradient(135deg, #ef6c00 0%, #f57c00 100%); }
+        .level-3-bg { background: linear-gradient(135deg, #f9a825 0%, #fbc02d 100%); }
+        .level-4-bg { background: linear-gradient(135deg, #689f38 0%, #7cb342 100%); }
+        .level-5-bg { background: linear-gradient(135deg, #0097a7 0%, #00acc1 100%); }
+        .level-6-bg { background: linear-gradient(135deg, #5e35b1 0%, #673ab7 100%); }
+        .level-7-bg { background: linear-gradient(135deg, #7b1fa2 0%, #8e24aa 100%); }
+
+        .detail-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .detail-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            text-align: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .detail-level-group {
+            margin-bottom: 12px;
+        }
+
+        .detail-level-header {
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            color: white;
+            font-size: 0.85em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-level-count {
+            background: rgba(255,255,255,0.3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+
+        .detail-values-list {
+            padding-left: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .detail-value-tag {
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: auto;
+            padding-top: 15px;
+        }
+        
+        .btn {
+            padding: 12px 35px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 40px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .info-text {
+            background: #e3f2fd;
+            border-left: 3px solid #2196f3;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            color: #1565c0;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .values-panel {
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+            }
+
+            .double-pyramid-container {
+                flex-direction: column;
+            }
+        }
+
+        .values-panel::-webkit-scrollbar,
+        .visualization-panel::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .values-panel::-webkit-scrollbar-track,
+        .visualization-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .values-panel::-webkit-scrollbar-thumb,
+        .visualization-panel::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 5px;
+        }
+        
+        .values-panel::-webkit-scrollbar-thumb:hover,
+        .visualization-panel::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 PVA nach Barrett</h1>
+            <p>Wählen Sie 10 Werte aus, die für Sie am wichtigsten sind</p>
+            <div class="selection-counter">
+                <span id="selectedCount">0</span> / 10 Werte ausgewählt
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="values-panel">
+                <h2>📋 Werte-Katalog</h2>
+                <div class="info-text">
+                    💡 Wählen Sie intuitiv die Werte aus, die Ihnen am wichtigsten sind. Die Zuordnung zu den Bewusstseinsebenen erfolgt automatisch in der Auswertung.
+                </div>
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Werte durchsuchen...">
+                <div class="values-grid" id="valuesContainer"></div>
+            </div>
+            
+            <div class="visualization-panel" id="visualizationPanel">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎯</div>
+                    <p><strong>Wählen Sie 10 Werte aus</strong><br><br>Ihre persönliche Auswertung wird angezeigt,<br>sobald Sie genau 10 Werte ausgewählt haben</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const VALUES_DATA = {"1":["Arbeitsplatzsicherheit","Finanzielle Sicherheit","Gesundheit","Kontrolle","Macht","Sicherheit","Wohlstand"],"2":["Belohnung","Familie","Freundschaft","Fürsorglichkeit","Gemocht werden","Hilfsbereitschaft","Konfliktbewältigung","Respekt","Zuhören"],"3":["Der/die Beste sein","Effizienz","Entschlussfreudigkeit","Erfahrung","Ergebnisverantwortung","Konfliktscheu","Leistungsorientierung","Logik/ Rationalität","Materialistisch","Stolz","Vorsicht","Wettbewerbsorientiert"],"4":["Anpassungsfähigkeit","Balance zw. Berufs- und Privatleben","Beharrlichkeit","Berufliche Weiterentwicklung","Einfluss","Initiative","Innovation","Kontinuierliches Lernen","Mut","Neugier","Offene Kommunikation","Unternehmergeist","Verantwortung für die Umwelt"],"5":["Ehrlichkeit","Einsatzbereitschaft/ Engagement","Fairness","Geduld","Humor/ Spaß","Integrität","Klarheit","Kooperation/ Zusammenarbeit","Kreativität","Offenheit","Positive Grundhaltung","Vertrauen"],"6":["Dienst an anderen","Einfühlungsvermögen","Einbeziehen","Etwas bewirken","Fördern und entwickeln","Freiwillige/ Ehrenamtliche Arbeit","Führungsqualitäten","Gesellschaftliches/ Soziales Engagement","Lebensqualität","Risikobereitschaft","Wohlbefinden"],"7":["An zukünftige Generationen denken","Begeisterung","Bescheidenheit","Ethisches Verhalten","Exzellenz/ Herausragendes leisten","Fokus auf den Sinn und Zweck","Globales Denken","Mühelos mit Ungewissheit umgehen","Naturschutz","Persönlichkeitsentwicklung","Qualität","Selbstverwirklichung","Unabhängigkeit","Vielfältigkeit","Vision","Weisheit"]};
+
+        const LEVEL_INFO = {"7":{name:"Selbstloser Dienst",desc:"Service",bereich:"Service"},"6":{name:"Einen Beitrag leisten, etwas bewirken",desc:"Etwas verändern in der Welt",bereich:"Einen Beitrag leisten, etwas bewirken"},"5":{name:"Innerer Zusammenhalt, in Einklang bringen",desc:"Sinn in der Existenz finden",bereich:"Innerer Zusammenhalt, in Einklang bringen"},"4":{name:"Transformation",desc:"Mut zu Entwicklung und Wachstum",bereich:"Transformation"},"3":{name:"Selbstwertgefühl",desc:"Ein Gefühl für Selbstwert haben",bereich:"Selbstwertgefühl"},"2":{name:"Beziehungen",desc:"Sich behütet und geliebt fühlen",bereich:"Beziehungen"},"1":{name:"Überleben",desc:"Unsere physischen und Überlebens-Bedürfnisse befriedigen",bereich:"Überleben"}};
+
+        let selectedValues = new Set();
+        let allValuesFlat = [];
+
+        function initializeApp() {
+            for (let level = 1; level <= 7; level++) {
+                VALUES_DATA[level].forEach(value => {
+                    allValuesFlat.push({ value, level });
+                });
+            }
+            allValuesFlat.sort((a, b) => a.value.localeCompare(b.value));
+            
+            renderValuesCatalog();
+            document.getElementById('searchBox').addEventListener('input', handleSearch);
+        }
+
+        function renderValuesCatalog() {
+            const container = document.getElementById('valuesContainer');
+            container.innerHTML = '';
+
+            allValuesFlat.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'value-card';
+                card.textContent = item.value;
+                card.dataset.value = item.value;
+                card.dataset.level = item.level;
+                card.onclick = () => toggleValue(item.value, item.level, card);
+                container.appendChild(card);
+            });
+        }
+
+        function handleSearch(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.value-card');
+            
+            cards.forEach(card => {
+                const value = card.textContent.toLowerCase();
+                if (value.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleValue(value, level, card) {
+            if (selectedValues.has(value)) {
+                selectedValues.delete(value);
+                card.classList.remove('selected');
+            } else {
+                if (selectedValues.size >= 10) {
+                    alert('Sie haben bereits 10 Werte ausgewählt. Bitte deselektieren Sie zuerst einen Wert.');
+                    return;
+                }
+                selectedValues.add(value);
+                card.classList.add('selected');
+            }
+
+            updateSelectionCounter();
+            updateValueCards();
+            updateVisualization();
+        }
+
+        function updateSelectionCounter() {
+            document.getElementById('selectedCount').textContent = selectedValues.size;
+        }
+
+        function updateValueCards() {
+            const allCards = document.querySelectorAll('.value-card');
+            allCards.forEach(card => {
+                if (selectedValues.size >= 10 && !selectedValues.has(card.dataset.value)) {
+                    card.classList.add('disabled');
+                } else {
+                    card.classList.remove('disabled');
+                }
+            });
+        }
+
+        function updateVisualization() {
+            const panel = document.getElementById('visualizationPanel');
+            
+            if (selectedValues.size !== 10) {
+                panel.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎯</div><p><strong>Wählen Sie 10 Werte aus</strong><br><br>Ihre persönliche Auswertung wird angezeigt,<br>sobald Sie genau 10 Werte ausgewählt haben</p></div>';
+                return;
+            }
+
+            const valuesByLevel = {};
+            for (let i = 1; i <= 7; i++) {
+                valuesByLevel[i] = [];
+            }
+
+            selectedValues.forEach(value => {
+                for (let level = 1; level <= 7; level++) {
+                    if (VALUES_DATA[level].includes(value)) {
+                        valuesByLevel[level].push(value);
+                        break;
+                    }
+                }
+            });
+
+            panel.innerHTML = '<h2>📊 Ihre Auswertung</h2><p class="visualization-subtitle">Das Barrett Modell der 7 Ebenen des Bewusstseins</p><div class="double-pyramid-container">' + buildLeftPyramid(valuesByLevel) + '</div><div class="detail-section"><h3>📋 Ihre ausgewählten Werte im Detail</h3>' + buildDetailView(valuesByLevel) + '</div><div class="action-buttons"><button class="btn btn-secondary" onclick="resetSelection()">🔄 Zurücksetzen</button><button class="btn btn-primary" onclick="downloadResults()">📥 Ergebnis herunterladen</button></div>';
+        }
+
+        function buildLeftPyramid(valuesByLevel) {
+            let html = '<div class="pyramid-section left-pyramid"><div class="pyramid-title">Werte</div><div class="pyramid-levels">';
+
+            for (let level = 7; level >= 1; level--) {
+                const count = valuesByLevel[level].length;
+                html += '<div class="pyramid-row level-' + level + '-bg"><div class="pyramid-row-content"><div class="pyramid-level-number">' + level + '</div><div class="pyramid-level-info"><div class="pyramid-level-name">' + LEVEL_INFO[level].name + '</div><div class="pyramid-level-desc">' + LEVEL_INFO[level].desc + '</div></div><div class="pyramid-dots-container">' + generateDots(count) + '</div></div></div>';
+            }
+
+            html += '</div></div>';
+            return html;
+        }
+
+        function buildDetailView(valuesByLevel) {
+            let html = '';
+            
+            for (let level = 7; level >= 1; level--) {
+                if (valuesByLevel[level].length > 0) {
+                    html += '<div class="detail-level-group"><div class="detail-level-header level-' + level + '-bg"><span>Ebene ' + level + ': ' + LEVEL_INFO[level].name + '</span><span class="detail-level-count">' + valuesByLevel[level].length + '</span></div><div class="detail-values-list">';
+                    valuesByLevel[level].forEach(value => {
+                        html += '<span class="detail-value-tag">' + value + '</span>';
+                    });
+                    html += '</div></div>';
+                }
+            }
+            
+            return html;
+        }
+
+        function generateDots(count) {
+            let html = '';
+            for (let i = 0; i < 10; i++) {
+                html += '<div class="pyramid-dot ' + (i < count ? 'filled' : '') + '"></div>';
+            }
+            return html;
+        }
+
+        function resetSelection() {
+            if (selectedValues.size > 0) {
+                if (!confirm('Möchten Sie wirklich alle Auswahlen zurücksetzen?')) {
+                    return;
+                }
+            }
+            
+            selectedValues.clear();
+            
+            const allCards = document.querySelectorAll('.value-card');
+            allCards.forEach(card => {
+                card.classList.remove('selected', 'disabled');
+            });
+            
+            updateSelectionCounter();
+            updateVisualization();
+        }
+
+        function downloadResults() {
+            const valuesByLevel = {};
+            for (let i = 1; i <= 7; i++) {
+                valuesByLevel[i] = [];
+            }
+
+            selectedValues.forEach(value => {
+                for (let level = 1; level <= 7; level++) {
+                    if (VALUES_DATA[level].includes(value)) {
+                        valuesByLevel[level].push(value);
+                        break;
+                    }
+                }
+            });
+
+            let report = '═══════════════════════════════════════════════════════════════\n           PVA NACH BARRETT - PERSÖNLICHES PROFIL\n═══════════════════════════════════════════════════════════════\n\nDatum: ' + new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }) + '\nAusgewählte Werte: ' + selectedValues.size + '\n\nDAS BARRETT MODELL DER 7 EBENEN DES BEWUSSTSEINS\n\n';
+
+            for (let level = 7; level >= 1; level--) {
+                report += '\n═══════════════════════════════════════════════════════════════\n';
+                report += 'EBENE ' + level + ': ' + LEVEL_INFO[level].name.toUpperCase() + '\n';
+                report += LEVEL_INFO[level].desc + '\n';
+                report += '═══════════════════════════════════════════════════════════════\n';
+                report += 'Anzahl: ' + valuesByLevel[level].length + '\n\n';
+                if (valuesByLevel[level].length > 0) {
+                    report += 'Ihre Werte:\n';
+                    valuesByLevel[level].forEach(value => {
+                        report += '  • ' + value + '\n';
+                    });
+                } else {
+                    report += '  (keine Werte auf dieser Ebene)\n';
+                }
+                report += '\n';
+            }
+
+            report += '\n═══════════════════════════════════════════════════════════════\n';
+            report += 'ZUSAMMENFASSUNG - ALLE AUSGEWÄHLTEN WERTE\n';
+            report += '═══════════════════════════════════════════════════════════════\n\n';
+            Array.from(selectedValues).sort().forEach(value => {
+                report += '• ' + value + '\n';
+            });
+
+            report += '\n\n═══════════════════════════════════════════════════════════════\n';
+            report += 'VERTEILUNG NACH EBENEN\n';
+            report += '═══════════════════════════════════════════════════════════════\n\n';
+            
+            for (let level = 7; level >= 1; level--) {
+                const count = valuesByLevel[level].length;
+                const bar = '█'.repeat(count) + '░'.repeat(10 - count);
+                report += 'Ebene ' + level + ': ' + bar + ' ' + count + '\n';
+            }
+
+            report += '\n\n───────────────────────────────────────────────────────────────\n';
+            report += 'Erstellt mit PVA nach Barrett Tool\n';
+            report += '© Barrett Values Centre\n';
+
+            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Barrett_Werte_Profil_' + new Date().toISOString().split('T')[0] + '.txt';
+            link.click();
+        }
+
+        initializeApp();
+    </script>
+</body>
+</html>
