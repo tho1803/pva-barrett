@@ -75,20 +75,6 @@
             font-size: 1.1em;
         }
         
-        .search-box {
-            margin-bottom: 6px;
-            padding: 6px 8px;
-            width: 100%;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 0.8em;
-            transition: border-color 0.3s;
-        }
-        
-        .search-box:focus {
-            outline: none;
-            border-color: #667eea;
-        }
         
         .values-grid {
             display: grid;
@@ -435,11 +421,9 @@
         
         <div class="main-content">
             <div class="values-panel">
-                <h2>📋 Werte-Katalog</h2>
                 <div class="info-text">
                     💡 Wählen Sie intuitiv die Werte aus, die Ihnen am wichtigsten sind. Die Zuordnung zu den Bewusstseinsebenen erfolgt automatisch in der Auswertung.
                 </div>
-                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Werte durchsuchen...">
                 <div class="values-grid" id="valuesContainer"></div>
             </div>
             
@@ -469,7 +453,6 @@
             allValuesFlat.sort((a, b) => a.value.localeCompare(b.value));
             
             renderValuesCatalog();
-            document.getElementById('searchBox').addEventListener('input', handleSearch);
         }
 
         function renderValuesCatalog() {
@@ -484,20 +467,6 @@
                 card.dataset.level = item.level;
                 card.onclick = () => toggleValue(item.value, item.level, card);
                 container.appendChild(card);
-            });
-        }
-
-        function handleSearch(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.value-card');
-            
-            cards.forEach(card => {
-                const value = card.textContent.toLowerCase();
-                if (value.includes(searchTerm)) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
             });
         }
 
