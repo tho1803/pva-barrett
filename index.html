@@ -16,7 +16,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
         
         .container {
@@ -31,26 +31,26 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 8px 20px;
             text-align: center;
         }
         
         .header h1 {
-            font-size: 1.8em;
-            margin-bottom: 8px;
+            font-size: 1.4em;
+            margin-bottom: 5px;
         }
         
         .header p {
-            font-size: 1em;
+            font-size: 0.85em;
             opacity: 0.9;
         }
         
         .selection-counter {
             background: rgba(255,255,255,0.2);
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 1.1em;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin-top: 6px;
+            font-size: 0.95em;
             font-weight: bold;
         }
         
@@ -61,9 +61,9 @@
         }
         
         .values-panel {
-            padding: 15px;
+            padding: 10px;
             border-right: 2px solid #e0e0e0;
-            height: calc(100vh - 140px);
+            height: calc(100vh - 100px);
             overflow-y: hidden;
             display: flex;
             flex-direction: column;
@@ -71,17 +71,17 @@
         
         .values-panel h2 {
             color: #667eea;
-            margin-bottom: 8px;
-            font-size: 1.3em;
+            margin-bottom: 5px;
+            font-size: 1.1em;
         }
         
         .search-box {
-            margin-bottom: 8px;
-            padding: 8px;
+            margin-bottom: 6px;
+            padding: 6px 8px;
             width: 100%;
             border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.85em;
+            border-radius: 5px;
+            font-size: 0.8em;
             transition: border-color 0.3s;
         }
         
@@ -92,24 +92,24 @@
         
         .values-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 6px;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 5px;
             flex: 1;
             overflow-y: auto;
             padding-right: 5px;
         }
         
         .value-card {
-            padding: 8px 6px;
+            padding: 6px 4px;
             border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
             background: white;
             text-align: center;
-            font-size: 0.78em;
+            font-size: 0.72em;
             height: fit-content;
-            line-height: 1.3;
+            line-height: 1.25;
         }
         
         .value-card:hover {
@@ -140,12 +140,12 @@
         }
         
         .visualization-panel {
-            padding: 15px;
+            padding: 10px;
             background: #f8f9fa;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            height: calc(100vh - 140px);
+            height: calc(100vh - 100px);
         }
         
         .visualization-panel h2 {
@@ -378,11 +378,12 @@
         .info-text {
             background: #e3f2fd;
             border-left: 3px solid #2196f3;
-            padding: 8px;
-            margin-bottom: 8px;
+            padding: 5px 8px;
+            margin-bottom: 6px;
             border-radius: 4px;
             color: #1565c0;
-            font-size: 0.8em;
+            font-size: 0.72em;
+            line-height: 1.3;
         }
 
         @media (max-width: 1024px) {
